@@ -1,0 +1,100 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  name          String
+  country       String
+  emailVerified Boolean   @default(false)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  restaurants   Restaurant[]
+  sessions      Session[]
+  verificationCodes EmailVerificationCode[]
+
+  @@map("users")
+}
+
+model EmailVerificationCode {
+  id        String   @id @default(cuid())
+  code      String
+  email     String
+  expiresAt DateTime
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@map("email_verification_codes")
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@map("sessions")
+}
+
+model Restaurant {
+  id        String    @id @default(cuid())
+  name      String
+  location  String
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  categories Category[]
+  dishes     Dish[]
+
+  @@map("restaurants")
+}
+
+model Category {
+  id           String       @id @default(cuid())
+  name         String
+  restaurantId String
+  restaurant   Restaurant   @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+  dishCategories DishCategory[]
+
+  @@map("categories")
+}
+
+model Dish {
+  id           String          @id @default(cuid())
+  name         String
+  description  String
+  image        String?
+  spiceLevel   Int?
+  price        Float?
+  restaurantId String
+  restaurant   Restaurant      @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
+  dishCategories DishCategory[]
+
+  @@map("dishes")
+}
+
+model DishCategory {
+  id         String   @id @default(cuid())
+  dishId     String
+  categoryId String
+  dish       Dish     @relation(fields: [dishId], references: [id], onDelete: Cascade)
+  category   Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@unique([dishId, categoryId])
+  @@map("dish_categories")
+}
+
