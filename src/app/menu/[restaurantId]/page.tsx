@@ -95,21 +95,36 @@ export default function MenuPage() {
     <div className="min-h-screen bg-[#f5f3f0]">
       {/* Restaurant Header */}
       <header className="sticky top-0 z-40 bg-[#8B4513] text-white shadow-md">
-        <div className="px-4 py-3 text-center sm:px-6 sm:py-4">
+        <div className="px-4 py-3 text-left sm:px-6 sm:py-4">
           <h1 className="text-lg font-bold sm:text-2xl">{menuData.restaurant.name}</h1>
+          {menuData.restaurant.location && (
+            <p className="text-sm text-white/90 sm:text-base">{menuData.restaurant.location}</p>
+          )}
         </div>
       </header>
 
       {/* Fixed Category Header */}
       {activeCategoryData && (
-        <div className="sticky top-[57px] z-30 bg-[#f5f3f0] px-4 py-2 shadow-sm sm:top-[73px] sm:py-3">
+        <div className="sticky top-[73px] z-30 bg-[#f5f3f0] px-4 py-2 shadow-sm sm:top-[89px] sm:py-3">
           <h2 className="text-lg font-bold text-red-600 sm:text-xl">{activeCategoryData.name}</h2>
         </div>
       )}
 
       {/* Menu Items */}
       <div className="pb-24">
-        {menuData.categories.map((category) => (
+        {menuData.categories.map((category: { 
+          id: string; 
+          name: string; 
+          dishes: Array<{ 
+            id: string; 
+            name: string; 
+            description: string; 
+            image: string | null; 
+            isVegetarian: boolean; 
+            spiceLevel: number | null; 
+            price: number | null 
+          }> 
+        }) => (
           <div
             key={category.id}
             ref={(el) => {
@@ -128,8 +143,49 @@ export default function MenuPage() {
                       key={dish.id}
                       className="mb-4 flex gap-3 rounded-lg bg-white p-3 shadow-sm sm:mb-6 sm:gap-4 sm:p-4"
                     >
+                      <div className="flex-1 min-w-0 relative">
+                        {/* Indicators - Top Left: Veg/Non-Veg circle + Spice level chilis */}
+                        <div className="absolute top-0 left-0 z-10 flex items-center gap-1.5">
+                          <span
+                            className={`w-2.5 h-2.5 flex-shrink-0 rounded-full sm:w-3 sm:h-3 ${
+                              dish.isVegetarian ? "bg-green-500" : "bg-red-500"
+                            }`}
+                            title={dish.isVegetarian ? "Vegetarian" : "Non-Vegetarian"}
+                          ></span>
+                          {dish.spiceLevel !== null && dish.spiceLevel > 0 && (
+                            <>
+                              {Array.from({ length: dish.spiceLevel }).map((_, i) => (
+                                <span key={i} className="text-red-500 text-xs sm:text-sm">🌶️</span>
+                              ))}
+                            </>
+                          )}
+                        </div>
+
+                        {/* Content with top padding to avoid overlap with indicators */}
+                        <div className="pt-6 sm:pt-7">
+                          {/* Dish Name */}
+                          <h3 className="text-sm font-semibold sm:text-base mb-1">{dish.name}</h3>
+                          
+                          {/* Price */}
+                          {dish.price !== null && (
+                            <p className="text-base font-bold mb-2 sm:text-lg">₹ {dish.price}</p>
+                          )}
+                          
+                          {/* Description */}
+                          <p className="text-xs text-gray-700 line-clamp-3 sm:text-sm">
+                            {dish.description}
+                          </p>
+                          {dish.description.length > 100 && (
+                            <button className="mt-1 text-xs text-blue-600 hover:underline sm:text-sm">
+                              ...read more
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                      
+                      {/* Image on Right with Curved Border */}
                       {dish.image && (
-                        <div className="relative h-20 w-20 flex-shrink-0 overflow-hidden rounded-full sm:h-24 sm:w-24">
+                        <div className="relative h-20 w-20 flex-shrink-0 overflow-hidden rounded-2xl sm:h-24 sm:w-24">
                           <Image
                             src={dish.image}
                             alt={dish.name}
@@ -138,35 +194,6 @@ export default function MenuPage() {
                           />
                         </div>
                       )}
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-start justify-between gap-2">
-                          <div className="flex items-center gap-2 min-w-0 flex-1">
-                            <h3 className="text-sm font-semibold sm:text-base truncate">{dish.name}</h3>
-                            <span
-                              className={`w-2.5 h-2.5 flex-shrink-0 rounded-full sm:w-3 sm:h-3 ${
-                                dish.isVegetarian ? "bg-green-500" : "bg-red-500"
-                              }`}
-                              title={dish.isVegetarian ? "Vegetarian" : "Non-Vegetarian"}
-                            ></span>
-                          </div>
-                          {dish.price !== null && (
-                            <span className="text-base font-bold flex-shrink-0 sm:text-lg">₹ {dish.price}</span>
-                          )}
-                        </div>
-                        {dish.spiceLevel !== null && (
-                          <p className="text-xs text-muted-foreground sm:text-sm">
-                            Spice Level: {dish.spiceLevel}/3
-                          </p>
-                        )}
-                        <p className="mt-1 text-xs text-gray-700 line-clamp-3 sm:text-sm">
-                          {dish.description}
-                        </p>
-                        {dish.description.length > 100 && (
-                          <button className="mt-1 text-xs text-blue-600 hover:underline sm:text-sm">
-                            ...read more
-                          </button>
-                        )}
-                      </div>
                     </div>
                   ))}
                 </div>
@@ -195,7 +222,19 @@ export default function MenuPage() {
             </SheetDescription>
           </SheetHeader>
           <div className="mt-6 space-y-2">
-            {menuData.categories.map((category: { id: string; name: string; dishes: Array<unknown> }) => (
+            {menuData.categories.map((category: { 
+          id: string; 
+          name: string; 
+          dishes: Array<{ 
+            id: string; 
+            name: string; 
+            description: string; 
+            image: string | null; 
+            isVegetarian: boolean; 
+            spiceLevel: number | null; 
+            price: number | null 
+          }> 
+        }) => (
               <button
                 key={category.id}
                 onClick={() => scrollToCategory(category.id)}
