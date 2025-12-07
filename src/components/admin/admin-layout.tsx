@@ -26,7 +26,7 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
           <div className="flex items-center gap-4">
             {session?.user && (
               <span className="text-sm text-gray-600">
-                {session.user.name} ({session.user.email})
+                {session.user.name}
               </span>
             )}
             <Button variant="outline" onClick={handleLogout}>

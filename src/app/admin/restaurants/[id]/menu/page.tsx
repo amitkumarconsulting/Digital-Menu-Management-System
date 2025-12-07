@@ -34,6 +34,7 @@ export default function MenuPage() {
     name: string;
     description: string;
     image?: string | null;
+    isVegetarian: boolean;
     spiceLevel?: number | null;
     price?: number | null;
     categoryIds: string[];
@@ -43,6 +44,7 @@ export default function MenuPage() {
   const [dishName, setDishName] = useState("");
   const [dishDescription, setDishDescription] = useState("");
   const [dishImage, setDishImage] = useState("");
+  const [dishIsVegetarian, setDishIsVegetarian] = useState(true);
   const [dishSpiceLevel, setDishSpiceLevel] = useState<number | undefined>();
   const [dishPrice, setDishPrice] = useState("");
   const [selectedCategoryIds, setSelectedCategoryIds] = useState<string[]>([]);
@@ -106,6 +108,7 @@ export default function MenuPage() {
     setDishName("");
     setDishDescription("");
     setDishImage("");
+    setDishIsVegetarian(true);
     setDishSpiceLevel(undefined);
     setDishPrice("");
     setSelectedCategoryIds([]);
@@ -143,6 +146,7 @@ export default function MenuPage() {
       name: dishName,
       description: dishDescription,
       image: dishImage || undefined,
+      isVegetarian: dishIsVegetarian,
       spiceLevel: dishSpiceLevel,
       price: dishPrice ? parseFloat(dishPrice) : undefined,
       categoryIds: selectedCategoryIds,
@@ -159,6 +163,7 @@ export default function MenuPage() {
       name: dishName,
       description: dishDescription,
       image: dishImage || null,
+      isVegetarian: dishIsVegetarian,
       spiceLevel: dishSpiceLevel ?? null,
       price: dishPrice ? parseFloat(dishPrice) : null,
       categoryIds: selectedCategoryIds,
@@ -171,6 +176,7 @@ export default function MenuPage() {
       name: dish.name,
       description: dish.description,
       image: dish.image,
+      isVegetarian: dish.isVegetarian,
       spiceLevel: dish.spiceLevel,
       price: dish.price,
       categoryIds: dish.dishCategories.map((dc) => dc.categoryId),
@@ -178,6 +184,7 @@ export default function MenuPage() {
     setDishName(dish.name);
     setDishDescription(dish.description);
     setDishImage(dish.image || "");
+    setDishIsVegetarian(dish.isVegetarian);
     setDishSpiceLevel(dish.spiceLevel ?? undefined);
     setDishPrice(dish.price?.toString() || "");
     setSelectedCategoryIds(dish.dishCategories.map((dc) => dc.categoryId));
@@ -358,6 +365,37 @@ export default function MenuPage() {
                       type="url"
                     />
                   </div>
+                  <div className="space-y-2">
+                    <Label>Vegetarian / Non-Vegetarian</Label>
+                    <div className="flex gap-4">
+                      <label className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="radio"
+                          name="vegOption"
+                          checked={dishIsVegetarian}
+                          onChange={() => setDishIsVegetarian(true)}
+                          className="w-4 h-4"
+                        />
+                        <span className="flex items-center gap-2">
+                          <span className="w-3 h-3 rounded-full bg-green-500"></span>
+                          Vegetarian
+                        </span>
+                      </label>
+                      <label className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="radio"
+                          name="vegOption"
+                          checked={!dishIsVegetarian}
+                          onChange={() => setDishIsVegetarian(false)}
+                          className="w-4 h-4"
+                        />
+                        <span className="flex items-center gap-2">
+                          <span className="w-3 h-3 rounded-full bg-red-500"></span>
+                          Non-Vegetarian
+                        </span>
+                      </label>
+                    </div>
+                  </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label htmlFor="dishPrice">Price (₹)</Label>
@@ -370,7 +408,7 @@ export default function MenuPage() {
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="dishSpiceLevel">Spice Level (0-5)</Label>
+                      <Label htmlFor="dishSpiceLevel">Spice Level</Label>
                       <Select
                         value={dishSpiceLevel?.toString() ?? ""}
                         onValueChange={(value) =>
@@ -385,8 +423,6 @@ export default function MenuPage() {
                           <SelectItem value="1">1 - Mild</SelectItem>
                           <SelectItem value="2">2 - Medium</SelectItem>
                           <SelectItem value="3">3 - Hot</SelectItem>
-                          <SelectItem value="4">4 - Very Hot</SelectItem>
-                          <SelectItem value="5">5 - Extremely Hot</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
@@ -456,13 +492,21 @@ export default function MenuPage() {
                       </div>
                     )}
                     <CardHeader>
-                      <CardTitle className="text-lg">{dish.name}</CardTitle>
+                      <div className="flex items-center gap-2">
+                        <CardTitle className="text-lg">{dish.name}</CardTitle>
+                        <span
+                          className={`w-3 h-3 rounded-full ${
+                            dish.isVegetarian ? "bg-green-500" : "bg-red-500"
+                          }`}
+                          title={dish.isVegetarian ? "Vegetarian" : "Non-Vegetarian"}
+                        ></span>
+                      </div>
                       {dish.price !== null && (
                         <p className="text-lg font-semibold">₹ {dish.price}</p>
                       )}
                       {dish.spiceLevel !== null && (
                         <p className="text-sm text-muted-foreground">
-                          Spice Level: {dish.spiceLevel}/5
+                          Spice Level: {dish.spiceLevel}/3
                         </p>
                       )}
                       <p className="text-sm text-muted-foreground line-clamp-2">

@@ -15,16 +15,109 @@ const getResend = () => {
 };
 
 export const authRouter = createTRPCRouter({
+  register: publicProcedure
+    .input(
+      z.object({
+        email: z.string().email(),
+        name: z.string().min(1, "Name is required"),
+        country: z.string().min(1, "Country is required"),
+      }),
+    )
+    .mutation(async ({ input }) => {
+      const { email, name, country } = input;
+
+      // Check if user already exists
+      const existingUser = await db.user.findUnique({
+        where: { email },
+      });
+
+      if (existingUser) {
+        throw new TRPCError({
+          code: "CONFLICT",
+          message: "User with this email already exists. Please login instead.",
+        });
+      }
+
+      // Create user
+      const user = await db.user.create({
+        data: {
+          email,
+          name,
+          country,
+          emailVerified: false,
+        },
+      });
+
+      // Generate 6-digit verification code
+      const code = Math.floor(100000 + Math.random() * 900000).toString();
+      const expiresAt = new Date();
+      expiresAt.setMinutes(expiresAt.getMinutes() + 10); // 10 minutes
+
+      // Delete old codes for this email
+      await db.emailVerificationCode.deleteMany({
+        where: { email },
+      });
+
+      // Create new verification code
+      await db.emailVerificationCode.create({
+        data: {
+          email,
+          code,
+          expiresAt,
+          userId: user.id,
+        },
+      });
+
+      // Send email
+      try {
+        const resend = getResend();
+        if (!resend) {
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Email service not configured",
+          });
+        }
+        await resend.emails.send({
+          from: "Digital Menu <onboarding@resend.dev>",
+          to: email,
+          subject: "Verify your email - Digital Menu",
+          html: `
+            <h1>Welcome to Digital Menu!</h1>
+            <p>Thank you for registering. Your verification code is: <strong>${code}</strong></p>
+            <p>This code will expire in 10 minutes.</p>
+          `,
+        });
+      } catch (error) {
+        console.error("Failed to send email:", error);
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to send verification code",
+        });
+      }
+
+      return { success: true, email };
+    }),
+
   sendVerificationCode: publicProcedure
     .input(
       z.object({
         email: z.string().email(),
-        name: z.string().min(1).optional(),
-        country: z.string().min(1).optional(),
       }),
     )
     .mutation(async ({ input }) => {
-      const { email} = input;
+      const { email } = input;
+
+      // Check if user exists
+      const user = await db.user.findUnique({
+        where: { email },
+      });
+
+      if (!user) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "User not found. Please register first.",
+        });
+      }
 
       // Generate 6-digit code
       const code = Math.floor(100000 + Math.random() * 900000).toString();
@@ -36,30 +129,13 @@ export const authRouter = createTRPCRouter({
         where: { email },
       });
 
-      // Check if user exists
-      let user = await db.user.findUnique({
-        where: { email },
-      });
-
-      // If user doesn't exist, create user with default values
-      if (!user) {
-        const emailUsername = email.split("@")[0] ?? "User";
-        user = await db.user.create({
-          data: {
-            email,
-            name: emailUsername,
-            country: "Unknown",
-          },
-        });
-      }
-
       // Create new code
-      const verificationCode = await db.emailVerificationCode.create({
+      await db.emailVerificationCode.create({
         data: {
           email,
           code,
           expiresAt,
-          ...(user ? { userId: user.id } : {}),
+          userId: user.id,
         },
       });
 
@@ -110,28 +186,23 @@ export const authRouter = createTRPCRouter({
       let user;
       
       if (isMasterCode) {
-        // Master code authentication - find or create user
+        // Master code authentication - find user (must exist)
         user = await db.user.findUnique({
           where: { email },
         });
 
         if (!user) {
-          // Create user if doesn't exist (master code allows bypassing registration)
-          user = await db.user.create({
-            data: {
-              email,
-              name: email.split("@")[0] ?? "User", // Default name from email
-              country: "Unknown", // Default country
-              emailVerified: true, // Auto-verify with master code
-            },
-          });
-        } else {
-          // Mark email as verified if user exists
-          await db.user.update({
-            where: { id: user.id },
-            data: { emailVerified: true },
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "User not found. Please register first.",
           });
         }
+
+        // Mark email as verified if user exists
+        await db.user.update({
+          where: { id: user.id },
+          data: { emailVerified: true },
+        });
       } else {
         // Normal email verification code flow
         if (code.length !== 6) {
@@ -184,7 +255,7 @@ export const authRouter = createTRPCRouter({
             } else if (code.length !== 6 && masterCodeConfigured) {
               errorMessage += ` The code must be 6 digits for email verification, or use the master code if configured.`;
             } else {
-              errorMessage += " Please send a verification code first and ensure you've provided your name and country during registration.";
+              errorMessage += " Please send a verification code first.";
             }
             
             throw new TRPCError({
@@ -205,7 +276,7 @@ export const authRouter = createTRPCRouter({
           if (!user) {
             throw new TRPCError({
               code: "BAD_REQUEST",
-              message: "User not found. Please send a verification code with your name and country to register first.",
+              message: "User not found. Please register first.",
             });
           }
         }
@@ -240,4 +311,3 @@ export const authRouter = createTRPCRouter({
     return { success: true };
   }),
 });
-

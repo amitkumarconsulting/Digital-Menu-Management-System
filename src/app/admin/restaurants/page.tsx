@@ -129,7 +129,7 @@ export default function RestaurantsPage() {
                     id="location"
                     value={location}
                     onChange={(e) => setLocation(e.target.value)}
-                    placeholder="123 Main St, City"
+                    placeholder="Street Name, City"
                   />
                 </div>
                 <div className="flex justify-end gap-2">

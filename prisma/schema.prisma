@@ -76,6 +76,7 @@ model Dish {
   name         String
   description  String
   image        String?
+  isVegetarian Boolean         @default(true)
   spiceLevel   Int?
   price        Float?
   restaurantId String

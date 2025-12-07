@@ -9,14 +9,18 @@ import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card";
 
-export default function LoginPage() {
+export default function RegisterPage() {
   const router = useRouter();
   const [email, setEmail] = useState("");
+  const [name, setName] = useState("");
+  const [country, setCountry] = useState("");
   const [code, setCode] = useState("");
-  const [step, setStep] = useState<"email" | "verify">("email");
+  const [step, setStep] = useState<"form" | "verify">("form");
+  const [registeredEmail, setRegisteredEmail] = useState("");
 
-  const sendCodeMutation = api.auth.sendVerificationCode.useMutation({
-    onSuccess: () => {
+  const registerMutation = api.auth.register.useMutation({
+    onSuccess: (data) => {
+      setRegisteredEmail(data.email);
       setStep("verify");
     },
     onError: (error) => {
@@ -35,13 +39,17 @@ export default function LoginPage() {
     },
   });
 
-  const handleSendCode = () => {
-    if (!email) {
-      alert("Please enter your email");
+  const handleRegister = () => {
+    if (!email || !name || !country) {
+      alert("Please fill in all fields");
       return;
     }
 
-    sendCodeMutation.mutate({ email });
+    registerMutation.mutate({
+      email,
+      name,
+      country,
+    });
   };
 
   const handleVerifyCode = () => {
@@ -50,25 +58,35 @@ export default function LoginPage() {
       return;
     }
 
-    verifyCodeMutation.mutate({ email, code });
+    verifyCodeMutation.mutate({ email: registeredEmail, code });
   };
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-50 p-4">
       <Card className="w-full max-w-md">
         <CardHeader>
-          <CardTitle>Login</CardTitle>
+          <CardTitle>Create Account</CardTitle>
           <CardDescription>
-            {step === "email"
-              ? "Enter your email to receive a verification code"
-              : "Enter the verification code sent to your email, or use the master code if configured"}
+            {step === "form"
+              ? "Enter your details to create an account"
+              : "Enter the verification code sent to your email"}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          {step === "email" ? (
+          {step === "form" ? (
             <>
               <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="name">Full Name *</Label>
+                <Input
+                  id="name"
+                  type="text"
+                  placeholder="Full Name"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="email">Email *</Label>
                 <Input
                   id="email"
                   type="email"
@@ -77,17 +95,27 @@ export default function LoginPage() {
                   onChange={(e) => setEmail(e.target.value)}
                 />
               </div>
+              <div className="space-y-2">
+                <Label htmlFor="country">Country *</Label>
+                <Input
+                  id="country"
+                  type="text"
+                  placeholder="India"
+                  value={country}
+                  onChange={(e) => setCountry(e.target.value)}
+                />
+              </div>
               <Button
                 className="w-full"
-                onClick={handleSendCode}
-                disabled={sendCodeMutation.isPending}
+                onClick={handleRegister}
+                disabled={registerMutation.isPending}
               >
-                {sendCodeMutation.isPending ? "Sending..." : "Send Verification Code"}
+                {registerMutation.isPending ? "Creating Account..." : "Create Account"}
               </Button>
               <div className="text-center text-sm">
-                <span className="text-muted-foreground">Don&apos;t have an account? </span>
-                <Link href="/auth/register" className="text-primary hover:underline">
-                  Register
+                <span className="text-muted-foreground">Already have an account? </span>
+                <Link href="/auth/login" className="text-primary hover:underline">
+                  Login
                 </Link>
               </div>
             </>
@@ -102,13 +130,16 @@ export default function LoginPage() {
                   value={code}
                   onChange={(e) => setCode(e.target.value)}
                 />
+                <p className="text-xs text-muted-foreground">
+                  A verification code has been sent to {registeredEmail}
+                </p>
               </div>
               <div className="flex gap-2">
                 <Button
                   variant="outline"
                   className="flex-1"
                   onClick={() => {
-                    setStep("email");
+                    setStep("form");
                     setCode("");
                   }}
                 >
@@ -129,3 +160,4 @@ export default function LoginPage() {
     </div>
   );
 }
+

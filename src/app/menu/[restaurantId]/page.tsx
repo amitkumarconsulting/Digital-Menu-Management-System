@@ -89,7 +89,7 @@ export default function MenuPage() {
     );
   }
 
-  const activeCategoryData = menuData.categories.find((c) => c.id === activeCategory);
+  const activeCategoryData = menuData.categories.find((c: { id: string }) => c.id === activeCategory);
 
   return (
     <div className="min-h-screen bg-[#f5f3f0]">
@@ -109,7 +109,7 @@ export default function MenuPage() {
 
       {/* Menu Items */}
       <div className="pb-24">
-        {menuData.categories.map((category) => (
+        {menuData.categories.map((category: { id: string; name: string; dishes: Array<{ id: string; name: string; description: string; image: string | null; isVegetarian: boolean; spiceLevel: number | null; price: number | null }> }) => (
           <div
             key={category.id}
             ref={(el) => {
@@ -123,7 +123,7 @@ export default function MenuPage() {
                   <h2 className="text-xl font-bold text-red-600">{category.name}</h2>
                 </div>
                 <div className="px-4 py-4">
-                  {category.dishes.map((dish) => (
+                  {category.dishes.map((dish: { id: string; name: string; description: string; image: string | null; isVegetarian: boolean; spiceLevel: number | null; price: number | null }) => (
                     <div
                       key={dish.id}
                       className="mb-6 flex gap-4 rounded-lg bg-white p-4 shadow-sm"
@@ -140,14 +140,22 @@ export default function MenuPage() {
                       )}
                       <div className="flex-1">
                         <div className="flex items-start justify-between gap-2">
-                          <h3 className="font-semibold">{dish.name}</h3>
+                          <div className="flex items-center gap-2">
+                            <h3 className="font-semibold">{dish.name}</h3>
+                            <span
+                              className={`w-3 h-3 rounded-full flex-shrink-0 ${
+                                dish.isVegetarian ? "bg-green-500" : "bg-red-500"
+                              }`}
+                              title={dish.isVegetarian ? "Vegetarian" : "Non-Vegetarian"}
+                            ></span>
+                          </div>
                           {dish.price !== null && (
                             <span className="text-lg font-bold">₹ {dish.price}</span>
                           )}
                         </div>
                         {dish.spiceLevel !== null && (
                           <p className="text-xs text-muted-foreground">
-                            Spice Level: {dish.spiceLevel}/5
+                            Spice Level: {dish.spiceLevel}/3
                           </p>
                         )}
                         <p className="mt-1 text-sm text-gray-700 line-clamp-3">
@@ -187,7 +195,7 @@ export default function MenuPage() {
             </SheetDescription>
           </SheetHeader>
           <div className="mt-6 space-y-2">
-            {menuData.categories.map((category) => (
+            {menuData.categories.map((category: { id: string; name: string; dishes: Array<unknown> }) => (
               <button
                 key={category.id}
                 onClick={() => scrollToCategory(category.id)}
