@@ -52,21 +52,21 @@ export default function QRCodePage() {
 
   return (
     <AdminLayout>
-      <div className="space-y-6">
-        <div className="flex items-center gap-4">
-          <Button variant="outline" onClick={() => router.push("/admin/restaurants")}>
+      <div className="space-y-4 sm:space-y-6">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
+          <Button variant="outline" size="sm" onClick={() => router.push("/admin/restaurants")} className="w-fit">
             <ArrowLeft className="mr-2 h-4 w-4" />
             Back
           </Button>
           <div>
-            <h2 className="text-3xl font-bold">QR Code</h2>
-            <p className="text-muted-foreground">
+            <h2 className="text-2xl font-bold sm:text-3xl">QR Code</h2>
+            <p className="text-sm text-muted-foreground sm:text-base">
               Share this QR code for {restaurant?.name}
             </p>
           </div>
         </div>
 
-        <Card className="mx-auto max-w-md">
+        <Card className="mx-auto w-full max-w-md">
           <CardHeader>
             <CardTitle>{restaurant?.name}</CardTitle>
             <CardDescription>

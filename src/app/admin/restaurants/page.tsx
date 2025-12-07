@@ -89,11 +89,11 @@ export default function RestaurantsPage() {
 
   return (
     <AdminLayout>
-      <div className="space-y-6">
-        <div className="flex items-center justify-between">
+      <div className="space-y-4 sm:space-y-6">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h2 className="text-3xl font-bold">Restaurants</h2>
-            <p className="text-muted-foreground">Manage your restaurants</p>
+            <h2 className="text-2xl font-bold sm:text-3xl">Restaurants</h2>
+            <p className="text-sm text-muted-foreground sm:text-base">Manage your restaurants</p>
           </div>
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
@@ -102,18 +102,18 @@ export default function RestaurantsPage() {
                 Add Restaurant
               </Button>
             </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>
-                  {editingRestaurant ? "Edit Restaurant" : "Add Restaurant"}
-                </DialogTitle>
-                <DialogDescription>
-                  {editingRestaurant
-                    ? "Update restaurant details"
-                    : "Add a new restaurant to manage"}
-                </DialogDescription>
-              </DialogHeader>
-              <div className="space-y-4 py-4">
+              <DialogContent className="w-[95vw] max-w-md sm:w-full">
+                <DialogHeader>
+                  <DialogTitle className="text-lg sm:text-xl">
+                    {editingRestaurant ? "Edit Restaurant" : "Add Restaurant"}
+                  </DialogTitle>
+                  <DialogDescription className="text-sm">
+                    {editingRestaurant
+                      ? "Update restaurant details"
+                      : "Add a new restaurant to manage"}
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="space-y-4 py-2 sm:py-4">
                 <div className="space-y-2">
                   <Label htmlFor="name">Restaurant Name</Label>
                   <Input

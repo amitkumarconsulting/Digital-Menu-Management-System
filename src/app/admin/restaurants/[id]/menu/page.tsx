@@ -201,15 +201,15 @@ export default function MenuPage() {
 
   return (
     <AdminLayout>
-      <div className="space-y-6">
-        <div className="flex items-center gap-4">
-          <Button variant="outline" onClick={() => router.push("/admin/restaurants")}>
+      <div className="space-y-4 sm:space-y-6">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
+          <Button variant="outline" size="sm" onClick={() => router.push("/admin/restaurants")} className="w-fit">
             <ArrowLeft className="mr-2 h-4 w-4" />
             Back
           </Button>
           <div>
-            <h2 className="text-3xl font-bold">{restaurant?.name}</h2>
-            <p className="text-muted-foreground">Manage menu categories and dishes</p>
+            <h2 className="text-2xl font-bold sm:text-3xl">{restaurant?.name}</h2>
+            <p className="text-sm text-muted-foreground sm:text-base">Manage menu categories and dishes</p>
           </div>
         </div>
 
@@ -230,18 +230,18 @@ export default function MenuPage() {
                   Add Category
                 </Button>
               </DialogTrigger>
-              <DialogContent>
+              <DialogContent className="w-[95vw] max-w-md sm:w-full">
                 <DialogHeader>
-                  <DialogTitle>
+                  <DialogTitle className="text-lg sm:text-xl">
                     {editingCategory ? "Edit Category" : "Add Category"}
                   </DialogTitle>
-                  <DialogDescription>
+                  <DialogDescription className="text-sm">
                     {editingCategory
                       ? "Update category name"
                       : "Create a new category for dishes"}
                   </DialogDescription>
                 </DialogHeader>
-                <div className="space-y-4 py-4">
+                <div className="space-y-4 py-2 sm:py-4">
                   <div className="space-y-2">
                     <Label htmlFor="categoryName">Category Name</Label>
                     <Input
@@ -328,14 +328,14 @@ export default function MenuPage() {
                   Add Dish
                 </Button>
               </DialogTrigger>
-              <DialogContent className="max-h-[90vh] overflow-y-auto">
+              <DialogContent className="max-h-[90vh] w-[95vw] max-w-md overflow-y-auto sm:w-full">
                 <DialogHeader>
-                  <DialogTitle>{editingDish ? "Edit Dish" : "Add Dish"}</DialogTitle>
-                  <DialogDescription>
+                  <DialogTitle className="text-lg sm:text-xl">{editingDish ? "Edit Dish" : "Add Dish"}</DialogTitle>
+                  <DialogDescription className="text-sm">
                     {editingDish ? "Update dish details" : "Add a new dish to the menu"}
                   </DialogDescription>
                 </DialogHeader>
-                <div className="space-y-4 py-4">
+                <div className="space-y-4 py-2 sm:py-4">
                   <div className="space-y-2">
                     <Label htmlFor="dishName">Dish Name *</Label>
                     <Input
@@ -396,7 +396,7 @@ export default function MenuPage() {
                       </label>
                     </div>
                   </div>
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                     <div className="space-y-2">
                       <Label htmlFor="dishPrice">Price (₹)</Label>
                       <Input
@@ -478,11 +478,11 @@ export default function MenuPage() {
             {dishes && dishes.length === 0 ? (
               <p className="text-muted-foreground">No dishes yet. Add one to get started.</p>
             ) : (
-              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 {dishes?.map((dish) => (
-                  <Card key={dish.id}>
+                  <Card key={dish.id} className="flex flex-col">
                     {dish.image && (
-                      <div className="relative h-48 w-full">
+                      <div className="relative h-40 w-full sm:h-48">
                         <Image
                           src={dish.image}
                           alt={dish.name}
@@ -491,25 +491,25 @@ export default function MenuPage() {
                         />
                       </div>
                     )}
-                    <CardHeader>
+                    <CardHeader className="flex-1 pb-3">
                       <div className="flex items-center gap-2">
-                        <CardTitle className="text-lg">{dish.name}</CardTitle>
+                        <CardTitle className="text-base sm:text-lg">{dish.name}</CardTitle>
                         <span
-                          className={`w-3 h-3 rounded-full ${
+                          className={`w-3 h-3 flex-shrink-0 rounded-full ${
                             dish.isVegetarian ? "bg-green-500" : "bg-red-500"
                           }`}
                           title={dish.isVegetarian ? "Vegetarian" : "Non-Vegetarian"}
                         ></span>
                       </div>
                       {dish.price !== null && (
-                        <p className="text-lg font-semibold">₹ {dish.price}</p>
+                        <p className="text-base font-semibold sm:text-lg">₹ {dish.price}</p>
                       )}
                       {dish.spiceLevel !== null && (
-                        <p className="text-sm text-muted-foreground">
+                        <p className="text-xs text-muted-foreground sm:text-sm">
                           Spice Level: {dish.spiceLevel}/3
                         </p>
                       )}
-                      <p className="text-sm text-muted-foreground line-clamp-2">
+                      <p className="text-xs text-muted-foreground line-clamp-2 sm:text-sm">
                         {dish.description}
                       </p>
                       <div className="flex flex-wrap gap-1">
@@ -523,26 +523,27 @@ export default function MenuPage() {
                         ))}
                       </div>
                     </CardHeader>
-                    <CardContent className="flex gap-2">
+                    <CardContent className="flex gap-2 pt-0">
                       <Button
                         variant="outline"
                         size="sm"
-                        className="flex-1"
+                        className="flex-1 text-xs sm:text-sm"
                         onClick={() => handleEditDish(dish)}
                       >
-                        <Edit className="mr-2 h-4 w-4" />
+                        <Edit className="mr-1 h-3 w-3 sm:mr-2 sm:h-4 sm:w-4" />
                         Edit
                       </Button>
                       <Button
                         variant="outline"
                         size="sm"
+                        className="text-xs sm:text-sm"
                         onClick={() => {
                           if (confirm(`Delete dish "${dish.name}"?`)) {
                             deleteDishMutation.mutate({ id: dish.id });
                           }
                         }}
                       >
-                        <Trash2 className="h-4 w-4" />
+                        <Trash2 className="h-3 w-3 sm:h-4 sm:w-4" />
                       </Button>
                     </CardContent>
                   </Card>

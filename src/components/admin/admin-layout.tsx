@@ -21,21 +21,21 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen bg-gray-50">
       <nav className="border-b bg-white">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4">
-          <h1 className="text-xl font-bold">Digital Menu Management</h1>
-          <div className="flex items-center gap-4">
+        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6 sm:py-4">
+          <h1 className="text-lg font-bold sm:text-xl">Digital Menu Management</h1>
+          <div className="flex items-center gap-2 sm:gap-4">
             {session?.user && (
-              <span className="text-sm text-gray-600">
+              <span className="hidden text-xs text-gray-600 sm:inline sm:text-sm">
                 {session.user.name}
               </span>
             )}
-            <Button variant="outline" onClick={handleLogout}>
+            <Button variant="outline" size="sm" className="text-xs sm:text-sm" onClick={handleLogout}>
               Logout
             </Button>
           </div>
         </div>
       </nav>
-      <main className="mx-auto max-w-7xl p-4">{children}</main>
+      <main className="mx-auto max-w-7xl p-4 sm:p-6">{children}</main>
     </div>
   );
 }

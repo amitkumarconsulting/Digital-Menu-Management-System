@@ -14,7 +14,14 @@ export const publicRouter = createTRPCRouter({
               dishCategories: {
                 include: {
                   dish: {
-                    include: {
+                    select: {
+                      id: true,
+                      name: true,
+                      description: true,
+                      image: true,
+                      isVegetarian: true,
+                      spiceLevel: true,
+                      price: true,
                       dishCategories: {
                         include: {
                           category: true,
