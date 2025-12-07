@@ -41,11 +41,14 @@ export const authRouter = createTRPCRouter({
         where: { email },
       });
 
-      // If user doesn't exist and name/country provided, create user
+      // If user doesn't exist, create user with default values
       if (!user) {
+        const emailUsername = email.split("@")[0] ?? "User";
         user = await db.user.create({
           data: {
-            email
+            email,
+            name: emailUsername,
+            country: "Unknown",
           },
         });
       }
